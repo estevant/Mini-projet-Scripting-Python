@@ -1,8 +1,8 @@
 import re
 import random
 import string
-import hashlib
 from bdd import get_connection
+import bcrypt
 
 def add_user(current_user_role):
     connexion = get_connection()
@@ -55,15 +55,18 @@ def add_user(current_user_role):
 
             chars = string.ascii_letters + string.digits + string.punctuation
             password_air = "".join(random.choice(chars) for _ in range(12))
-            password_hash = hashlib.sha256(password_air.encode()).hexdigest()
+
+            password_bytes = password_air.encode('utf-8')
+            password_hash_bytes = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
+            password_hash_bdd = password_hash_bytes.decode('utf-8')
 
             print(f"--> LOGIN : {login_genere}")
-            print(f"--> PASSWORD : {password_air}")
+            print(f"--> PASSWORD : {password_air}")  # On affiche le mot de passe en clair pour le noter
 
             try:
                 cursor.execute(
                     "INSERT INTO users (nom, prenom, mail, login, password, role) VALUES (%s, %s, %s, %s, %s, %s)",
-                    (nom, prenom, mail, login_genere, password_hash, role_a_attribuer)
+                    (nom, prenom, mail, login_genere, password_hash_bdd, role_a_attribuer)
                 )
                 connexion.commit()
                 print(f"L'utilisateur (Rôle: {role_a_attribuer}) a été rajouté")
