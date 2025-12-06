@@ -28,5 +28,4 @@ def create_superadmin():
         connexion.close()
 
 
-if __name__ == "__main__":
-    create_superadmin()
+create_superadmin()
